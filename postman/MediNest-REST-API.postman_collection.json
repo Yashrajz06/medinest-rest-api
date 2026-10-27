@@ -1,0 +1,149 @@
+{
+  "info": {
+    "name": "MediNest REST API - Doctor CRUD",
+    "description": "Import into Postman. Set baseUrl. Run Create first to populate doctorId.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "doctorId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "Health Check",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/health"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Health responds with expected status', function(){ pm.expect(pm.response.code).to.be.oneOf([200,503]); });"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Create Doctor (201)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/doctors",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Dr Aditi Sharma\",\n  \"specialty\": \"Cardiology\",\n  \"email\": \"aditi.sharma.demo@example.com\",\n  \"phone\": \"9876543210\",\n  \"clinic\": \"MediNest Heart Clinic\",\n  \"consultationFee\": 800,\n  \"available\": true\n}"
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('Create returns 201 or duplicate 409', function(){ pm.expect(pm.response.code).to.be.oneOf([201,409]); });",
+              "if(pm.response.code===201){pm.collectionVariables.set('doctorId',pm.response.json().data._id);}"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "Get All Doctors (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/doctors?page=1&limit=10"
+      }
+    },
+    {
+      "name": "Filter by Specialty",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/doctors?specialty=Cardiology"
+      }
+    },
+    {
+      "name": "Get One Doctor (200)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/doctors/{{doctorId}}"
+      }
+    },
+    {
+      "name": "Update Doctor (200)",
+      "request": {
+        "method": "PUT",
+        "url": "{{baseUrl}}/api/doctors/{{doctorId}}",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Dr Aditi Sharma\",\n  \"specialty\": \"Cardiology\",\n  \"email\": \"aditi.sharma.demo@example.com\",\n  \"phone\": \"9876543210\",\n  \"clinic\": \"MediNest Advanced Heart Clinic\",\n  \"consultationFee\": 950,\n  \"available\": true\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid Create (400)",
+      "request": {
+        "method": "POST",
+        "url": "{{baseUrl}}/api/doctors",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"X\",\n  \"specialty\": \"\",\n  \"email\": \"bad-email\",\n  \"phone\": \"123\",\n  \"clinic\": \"A\",\n  \"consultationFee\": -2\n}"
+        }
+      }
+    },
+    {
+      "name": "Invalid ID (400)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/doctors/not-an-object-id"
+      }
+    },
+    {
+      "name": "Delete Doctor (200)",
+      "request": {
+        "method": "DELETE",
+        "url": "{{baseUrl}}/api/doctors/{{doctorId}}"
+      }
+    },
+    {
+      "name": "Get Deleted Doctor (404)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/doctors/{{doctorId}}"
+      }
+    },
+    {
+      "name": "Unknown Route (404)",
+      "request": {
+        "method": "GET",
+        "url": "{{baseUrl}}/api/not-a-route"
+      }
+    }
+  ]
+}
